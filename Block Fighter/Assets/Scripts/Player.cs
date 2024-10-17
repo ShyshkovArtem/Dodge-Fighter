@@ -17,9 +17,11 @@ public class Player : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
-            Vector3 touchPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            // Get the player's screen position
+            Vector3 playerScreenPos = Camera.main.WorldToScreenPoint(transform.position);
 
-            if(touchPos.x < 0)
+            // Compare the mouse position with the player's screen position
+            if (Input.mousePosition.x < playerScreenPos.x)
             {
                 rb.AddForce(Vector2.left * moveSpeed);
             }
@@ -27,11 +29,11 @@ public class Player : MonoBehaviour
             {
                 rb.AddForce(Vector2.right * moveSpeed);
             }
-
         }
-        else 
+        else
         {
-            rb.velocity = Vector2.zero;
+            // Stop horizontal movement but preserve any vertical velocity
+            rb.velocity = new Vector2(0, rb.velocity.y);
         }
     }
 
