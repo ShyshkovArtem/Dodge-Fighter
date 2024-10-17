@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
     {
         Vector3 spawnPos = spawnPoint.position;
 
-        spawnPos.x = Random.Range(-max_X, max_X);
+        spawnPos.x = Random.Range(-8.1f, 2.8f);
 
         Instantiate(block, spawnPos, Quaternion.identity);
 
