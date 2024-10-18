@@ -52,7 +52,7 @@ public class Player : MonoBehaviour
         if(collision.gameObject.tag == "Block")
         {
             //Later change to menu scene
-            SceneManager.LoadScene(0);
+            SceneManager.LoadScene("MainMenu");
         }
     }
 }
