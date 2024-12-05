@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class Player : MonoBehaviour
     public float moveSpeed;
     Rigidbody2D rb;
     public Animator animator;
+    public GameManager gm;
 
     void Start()
     {
@@ -28,7 +30,7 @@ public class Player : MonoBehaviour
                 animator.SetBool("isRunning", true);
 
                 // Make player face left by flipping the sprite
-                transform.localScale = new Vector3(-3, transform.localScale.y, transform.localScale.z);
+                transform.localScale = new Vector3(-3f, transform.localScale.y, transform.localScale.z);
             }
             else
             {
@@ -36,7 +38,7 @@ public class Player : MonoBehaviour
                 animator.SetBool("isRunning", true);
 
                 // Make player face right by resetting the flip
-                transform.localScale = new Vector3(3, transform.localScale.y, transform.localScale.z);
+                transform.localScale = new Vector3(3f, transform.localScale.y, transform.localScale.z);
             }
         }
         else
@@ -49,10 +51,17 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.gameObject.tag == "Block")
+        if (collision.gameObject.tag == "Block")
         {
-            //Later change to menu scene
+            CoinManager.coinAll += gm.coinLvl;
             SceneManager.LoadScene("MainMenu");
         }
+
+        if (collision.gameObject.tag == "Coin")
+        {
+            Destroy(collision.gameObject);
+            gm.coinLvl++;
+        }
+
     }
 }

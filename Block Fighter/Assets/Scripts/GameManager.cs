@@ -6,9 +6,12 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public GameObject block;
+    public GameObject coin;
     public float max_X;
     public Transform spawnPoint;
     public float spawmRate;
+
+    public GameObject open_Door;
 
     bool gameStarted = false;
 
@@ -16,6 +19,8 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI scoreText;
 
     int score = 0;
+    public int coinLvl;
+    public TextMeshProUGUI coinLVL_Text;
 
     void Update()
     {
@@ -26,7 +31,9 @@ public class GameManager : MonoBehaviour
             gameStarted = true;
             tapText.SetActive(false);
         }
-        
+
+    coinLVL_Text.text = coinLvl.ToString();
+
     }
 
     void StartSpawning () 
@@ -36,14 +43,27 @@ public class GameManager : MonoBehaviour
 
     private void SpawnBlock()
     {
-        Vector3 spawnPos = spawnPoint.position;
+        if (score < 10)
+        {
+            Vector3 spawnPos = spawnPoint.position;
 
-        spawnPos.x = Random.Range(-8.1f, 2.8f);
+            //for block
+            spawnPos.x = Random.Range(-8.1f, 2.7f);
 
-        Instantiate(block, spawnPos, Quaternion.identity);
+            Instantiate(block, spawnPos, Quaternion.identity);
 
-        score++;
+            score++;
 
-        scoreText.text = score.ToString();
+            scoreText.text = score.ToString();
+
+            //for coin
+            spawnPos.x = Random.Range(-8.1f, 2.7f);
+
+            Instantiate(coin, spawnPos, Quaternion.identity);
+        } else
+        {
+            open_Door.SetActive(true);
+        }
+        
     }
 }
