@@ -10,7 +10,13 @@ public class Player : MonoBehaviour
     Rigidbody2D rb;
     public Animator animator;
     public GameManager gm;
+    public AudioManager am;
 
+
+    private void Awake()
+    {
+        am = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
+    }
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();   
@@ -28,6 +34,7 @@ public class Player : MonoBehaviour
             {
                 rb.AddForce(Vector2.left * moveSpeed);
                 animator.SetBool("isRunning", true);
+                //am.PlaySFX(am.steps);
 
                 // Make player face left by flipping the sprite
                 transform.localScale = new Vector3(-3f, transform.localScale.y, transform.localScale.z);
@@ -36,6 +43,7 @@ public class Player : MonoBehaviour
             {
                 rb.AddForce(Vector2.right * moveSpeed);
                 animator.SetBool("isRunning", true);
+                //am.PlaySFX(am.steps);
 
                 // Make player face right by resetting the flip
                 transform.localScale = new Vector3(3f, transform.localScale.y, transform.localScale.z);
@@ -54,13 +62,16 @@ public class Player : MonoBehaviour
         if (collision.gameObject.tag == "Block")
         {
             CoinManager.coinAll += gm.coinLvl;
+            am.PlaySFX(am.death);
             SceneManager.LoadScene("MainMenu");
+            
         }
 
         if (collision.gameObject.tag == "Coin")
         {
             Destroy(collision.gameObject);
             gm.coinLvl++;
+            am.PlaySFX(am.coin);
         }
 
     }

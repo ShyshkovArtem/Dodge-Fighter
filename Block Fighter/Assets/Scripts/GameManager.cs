@@ -22,6 +22,14 @@ public class GameManager : MonoBehaviour
     public int coinLvl;
     public TextMeshProUGUI coinLVL_Text;
 
+    public AudioManager am;
+
+
+    private void Awake()
+    {
+        am = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
+    }
+
     void Update()
     {
         //Later change to menu Start button
@@ -62,7 +70,9 @@ public class GameManager : MonoBehaviour
             Instantiate(coin, spawnPos, Quaternion.identity);
         } else
         {
+            am.PlaySFX(am.win);
             open_Door.SetActive(true);
+            CancelInvoke("SpawnBlock");
         }
         
     }
