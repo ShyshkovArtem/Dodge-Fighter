@@ -8,7 +8,9 @@ public class MainMenu : MonoBehaviour
     public GameObject optionsPopUp;
     public GameObject Logo;
     public GameObject Buttons;
+    public GameObject PauseGameSet;
 
+    //MAIN MENU UI
     public void OnStartButtonPressed()
     {
         SceneManager.LoadScene("room1");
@@ -40,4 +42,24 @@ public class MainMenu : MonoBehaviour
 
     
     */
+
+
+    //IN GAME UI
+
+    public void PauseGame()
+    {
+        PauseGameSet.SetActive(true);
+        Time.timeScale = 0;
+    }
+
+    public void CountinueGame() 
+    { 
+        PauseGameSet.SetActive(false);
+        Time.timeScale = 1;
+    }
+    public void HomeGame()
+    {
+        SceneManager.LoadScene("MainMenu");
+        Time.timeScale = 1;
+    }
 }
