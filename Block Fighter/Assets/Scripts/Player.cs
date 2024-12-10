@@ -62,6 +62,7 @@ public class Player : MonoBehaviour
         if (collision.gameObject.tag == "Block")
         {
             CoinManager.coinAll += gm.coinLvl;
+            PlayerPrefs.SetInt("allCoins", CoinManager.coinAll);
             am.PlaySFX(am.death);
             SceneManager.LoadScene("MainMenu");
             
@@ -75,4 +76,6 @@ public class Player : MonoBehaviour
         }
 
     }
+
+    
 }
