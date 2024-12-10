@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -18,6 +19,8 @@ public class Player : MonoBehaviour
     private float dashingTime = 0.2f;
     private float dashingCooldown = 2f;
     [SerializeField] private TrailRenderer tr;
+    [SerializeField] private Image imageCooldown;
+    private float cooldownTimer = 0f;
 
     //double tap
     private const float double_click_time = 0.2f;
@@ -30,7 +33,8 @@ public class Player : MonoBehaviour
     }
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();   
+        rb = GetComponent<Rigidbody2D>();
+        imageCooldown.fillAmount = 0f;
     }
 
     void Update()
@@ -50,6 +54,10 @@ public class Player : MonoBehaviour
             {
                 //Dash
                 StartCoroutine(Dash());
+                am.PlaySFX(am.dash);
+
+                cooldownTimer = dashingCooldown;
+                ApplyCooldown();
             }
             else
             {
@@ -83,6 +91,7 @@ public class Player : MonoBehaviour
             rb.velocity = new Vector2(0, rb.velocity.y);
             animator.SetBool("isRunning", false);
         }
+        ApplyCooldown();
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -124,5 +133,17 @@ public class Player : MonoBehaviour
         canDash = true;
     }
 
-    
+    void ApplyCooldown() 
+    { 
+        cooldownTimer -= Time.deltaTime;
+
+        if (cooldownTimer <= 0)
+        {
+            imageCooldown.fillAmount = 0f;
+        }
+        else
+        {
+            imageCooldown.fillAmount = cooldownTimer / dashingCooldown;
+        }
+    }    
 }

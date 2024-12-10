@@ -1167,6 +1167,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7339847520080871454, guid: 99192c0e5523a4c47abbded44df5c4f7, type: 3}
+      propertyPath: buttonClick
+      value: 
+      objectReference: {fileID: 8300000, guid: 32d4b1811dda14a6cb9e059ee8ad17d2, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4160,6 +4164,7 @@ MonoBehaviour:
   Logo: {fileID: 1298219247}
   Buttons: {fileID: 1901526083}
   PauseGameSet: {fileID: 0}
+  am: {fileID: 0}
 --- !u!114 &1698600328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5169,8 +5174,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8577760145126075775, guid: a6b4f50c081f530418c33eee34488a19, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 164
+      objectReference: {fileID: 0}
+    - target: {fileID: 8577760145126075775, guid: a6b4f50c081f530418c33eee34488a19, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 155
+      value: 125
       objectReference: {fileID: 0}
     - target: {fileID: 8864949841209330631, guid: a6b4f50c081f530418c33eee34488a19, type: 3}
       propertyPath: m_Pivot.x
