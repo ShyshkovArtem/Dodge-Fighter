@@ -4159,6 +4159,7 @@ MonoBehaviour:
   optionsPopUp: {fileID: 1766461762}
   Logo: {fileID: 1298219247}
   Buttons: {fileID: 1901526083}
+  PauseGameSet: {fileID: 0}
 --- !u!114 &1698600328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5169,7 +5170,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8577760145126075775, guid: a6b4f50c081f530418c33eee34488a19, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 140
+      value: 155
       objectReference: {fileID: 0}
     - target: {fileID: 8864949841209330631, guid: a6b4f50c081f530418c33eee34488a19, type: 3}
       propertyPath: m_Pivot.x

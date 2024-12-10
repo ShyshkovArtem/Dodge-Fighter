@@ -12,6 +12,17 @@ public class Player : MonoBehaviour
     public GameManager gm;
     public AudioManager am;
 
+    private bool canDash = true;
+    private bool isDashing = false;
+    private float dashingPower = 4f;
+    private float dashingTime = 0.2f;
+    private float dashingCooldown = 2f;
+    [SerializeField] private TrailRenderer tr;
+
+    //double tap
+    private const float double_click_time = 0.2f;
+    private float lastClickTime;
+
 
     private void Awake()
     {
@@ -24,30 +35,47 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (isDashing) { return; }
+
         if (Input.GetMouseButton(0))
         {
             // Get the player's screen position
             Vector3 playerScreenPos = Camera.main.WorldToScreenPoint(transform.position);
 
-            // Compare the mouse position with the player's screen position
-            if (Input.mousePosition.x < playerScreenPos.x)
-            {
-                rb.AddForce(Vector2.left * moveSpeed);
-                animator.SetBool("isRunning", true);
-                //am.PlaySFX(am.steps);
+            float timeSinceLastTimeClick = Time.time - lastClickTime;
 
-                // Make player face left by flipping the sprite
-                transform.localScale = new Vector3(-3f, transform.localScale.y, transform.localScale.z);
+            Debug.Log( timeSinceLastTimeClick);
+
+            if (timeSinceLastTimeClick <= double_click_time && timeSinceLastTimeClick > 0.05 && canDash)
+            {
+                //Dash
+                StartCoroutine(Dash());
             }
             else
             {
-                rb.AddForce(Vector2.right * moveSpeed);
-                animator.SetBool("isRunning", true);
-                //am.PlaySFX(am.steps);
 
-                // Make player face right by resetting the flip
-                transform.localScale = new Vector3(3f, transform.localScale.y, transform.localScale.z);
+                // Compare the mouse position with the player's screen position
+                if (Input.mousePosition.x < playerScreenPos.x)
+                {
+                    rb.AddForce(Vector2.left * moveSpeed);
+                    animator.SetBool("isRunning", true);
+                    //am.PlaySFX(am.steps);
+
+                    // Make player face left by flipping the sprite
+                    transform.localScale = new Vector3(-3f, transform.localScale.y, transform.localScale.z);
+                }
+                else
+                {
+                    rb.AddForce(Vector2.right * moveSpeed);
+                    animator.SetBool("isRunning", true);
+                    //am.PlaySFX(am.steps);
+
+                    // Make player face right by resetting the flip
+                    transform.localScale = new Vector3(3f, transform.localScale.y, transform.localScale.z);
+                }
             }
+
+            lastClickTime = Time.time;
         }
         else
         {
@@ -75,6 +103,25 @@ public class Player : MonoBehaviour
             am.PlaySFX(am.coin);
         }
 
+    }
+
+    private IEnumerator Dash()
+    {
+        canDash = false;
+        isDashing = true;
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale = 0f;
+        rb.velocity = new Vector2(transform.localScale.x * dashingPower, 0f);
+        tr.emitting = true;
+
+        yield return new WaitForSeconds(dashingTime);
+
+        tr.emitting = false;
+        rb.gravityScale = originalGravity;
+        isDashing = false;
+
+        yield return new WaitForSeconds(dashingCooldown);
+        canDash = true;
     }
 
     
