@@ -1,117 +1,133 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public float moveSpeed;
-    Rigidbody2D rb;
-    public Animator animator;
-    public GameManager gm;
-    public AudioManager am;
+    private const float DoubleClickTime = 0.2f;
+    private const float MinimumDoubleClickTime = 0.05f;
+    private const string BlockTag = "Block";
+    private const string CoinTag = "Coin";
+    private const string MainMenuSceneName = "MainMenu";
+    private const float FacingLeftX = -3f;
+    private const float FacingRightX = 3f;
 
-    private bool canDash = true;
-    private bool isDashing = false;
-    private float dashingPower = 4f;
-    private float dashingTime = 0.2f;
-    private float dashingCooldown = 2f;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private Animator animator;
+    [SerializeField] private GameManager gm;
     [SerializeField] private TrailRenderer tr;
     [SerializeField] private Image imageCooldown;
-    private float cooldownTimer = 0f;
+    [SerializeField] private float dashingPower = 4f;
+    [SerializeField] private float dashingTime = 0.2f;
+    [SerializeField] private float dashingCooldown = 2f;
 
-    //double tap
-    private const float double_click_time = 0.2f;
+    private Rigidbody2D rb;
+    private AudioManager audioManager;
+    private bool canDash = true;
+    private bool isDashing;
+    private float cooldownTimer;
     private float lastClickTime;
-
 
     private void Awake()
     {
-        am = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
-    }
-    void Start()
-    {
         rb = GetComponent<Rigidbody2D>();
-        imageCooldown.fillAmount = 0f;
+        gm ??= FindObjectOfType<GameManager>();
+
+        GameObject audioObject = GameObject.FindGameObjectWithTag("Audio");
+        if (audioObject != null)
+        {
+            audioManager = audioObject.GetComponent<AudioManager>();
+        }
     }
 
-    void Update()
+    private void Start()
     {
-        if (isDashing) { return; }
+        PlayerSkinApplier.ApplySelectedSkin(animator);
+        SetCooldownFill(0f);
+    }
+
+    private void Update()
+    {
+        if (isDashing)
+        {
+            return;
+        }
 
         if (Input.GetMouseButton(0))
         {
-            // Get the player's screen position
-            Vector3 playerScreenPos = Camera.main.WorldToScreenPoint(transform.position);
-
-            float timeSinceLastTimeClick = Time.time - lastClickTime;
-
-            Debug.Log( timeSinceLastTimeClick);
-
-            if (timeSinceLastTimeClick <= double_click_time && timeSinceLastTimeClick > 0.05 && canDash)
-            {
-                //Dash
-                StartCoroutine(Dash());
-                am.PlaySFX(am.dash);
-
-                cooldownTimer = dashingCooldown;
-                ApplyCooldown();
-            }
-            else
-            {
-
-                // Compare the mouse position with the player's screen position
-                if (Input.mousePosition.x < playerScreenPos.x)
-                {
-                    rb.AddForce(Vector2.left * moveSpeed);
-                    animator.SetBool("isRunning", true);
-                    //am.PlaySFX(am.steps);
-
-                    // Make player face left by flipping the sprite
-                    transform.localScale = new Vector3(-3f, transform.localScale.y, transform.localScale.z);
-                }
-                else
-                {
-                    rb.AddForce(Vector2.right * moveSpeed);
-                    animator.SetBool("isRunning", true);
-                    //am.PlaySFX(am.steps);
-
-                    // Make player face right by resetting the flip
-                    transform.localScale = new Vector3(3f, transform.localScale.y, transform.localScale.z);
-                }
-            }
-
-            lastClickTime = Time.time;
+            HandleMovementInput();
         }
         else
         {
-            // Stop horizontal movement but preserve any vertical velocity
-            rb.velocity = new Vector2(0, rb.velocity.y);
-            animator.SetBool("isRunning", false);
+            StopMoving();
         }
+
         ApplyCooldown();
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Block")
+        if (collision.gameObject.CompareTag(BlockTag))
         {
-            CoinManager.coinAll += gm.coinLvl;
-            PlayerPrefs.SetInt("allCoins", CoinManager.coinAll);
-            am.PlaySFX(am.death);
-            SceneManager.LoadScene("MainMenu");
-            
+            audioManager?.PlayDeath();
+
+            if (gm != null)
+            {
+                gm.PlayerDied();
+            }
+            else
+            {
+                SceneManager.LoadScene(MainMenuSceneName);
+            }
+
+            return;
         }
 
-        if (collision.gameObject.tag == "Coin")
+        if (collision.gameObject.CompareTag(CoinTag))
         {
             Destroy(collision.gameObject);
-            gm.coinLvl++;
-            am.PlaySFX(am.coin);
+            gm?.AddLevelCoin();
+            audioManager?.PlayCoin();
+        }
+    }
+
+    private void HandleMovementInput()
+    {
+        float timeSinceLastClick = Time.time - lastClickTime;
+
+        if (timeSinceLastClick <= DoubleClickTime && timeSinceLastClick > MinimumDoubleClickTime && canDash)
+        {
+            StartCoroutine(Dash());
+            audioManager?.PlayDash();
+            cooldownTimer = dashingCooldown;
+            return;
         }
 
+        MoveTowardsPointer();
+        lastClickTime = Time.time;
+    }
+
+    private void MoveTowardsPointer()
+    {
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null)
+        {
+            return;
+        }
+
+        Vector3 playerScreenPosition = mainCamera.WorldToScreenPoint(transform.position);
+        bool shouldMoveLeft = Input.mousePosition.x < playerScreenPosition.x;
+
+        rb.AddForce((shouldMoveLeft ? Vector2.left : Vector2.right) * moveSpeed);
+        SetRunning(true);
+        SetFacing(shouldMoveLeft ? FacingLeftX : FacingRightX);
+    }
+
+    private void StopMoving()
+    {
+        rb.velocity = new Vector2(0f, rb.velocity.y);
+        SetRunning(false);
     }
 
     private IEnumerator Dash()
@@ -121,11 +137,11 @@ public class Player : MonoBehaviour
         float originalGravity = rb.gravityScale;
         rb.gravityScale = 0f;
         rb.velocity = new Vector2(transform.localScale.x * dashingPower, 0f);
-        tr.emitting = true;
+        SetTrailEmitting(true);
 
         yield return new WaitForSeconds(dashingTime);
 
-        tr.emitting = false;
+        SetTrailEmitting(false);
         rb.gravityScale = originalGravity;
         isDashing = false;
 
@@ -133,17 +149,40 @@ public class Player : MonoBehaviour
         canDash = true;
     }
 
-    void ApplyCooldown() 
-    { 
+    private void ApplyCooldown()
+    {
         cooldownTimer -= Time.deltaTime;
+        SetCooldownFill(cooldownTimer <= 0f ? 0f : cooldownTimer / dashingCooldown);
+    }
 
-        if (cooldownTimer <= 0)
+    private void SetCooldownFill(float fillAmount)
+    {
+        if (imageCooldown != null)
         {
-            imageCooldown.fillAmount = 0f;
+            imageCooldown.fillAmount = fillAmount;
         }
-        else
+    }
+
+    private void SetRunning(bool isRunning)
+    {
+        if (animator != null)
         {
-            imageCooldown.fillAmount = cooldownTimer / dashingCooldown;
+            animator.SetBool("isRunning", isRunning);
         }
-    }    
+    }
+
+    private void SetFacing(float xScale)
+    {
+        Vector3 scale = transform.localScale;
+        scale.x = xScale;
+        transform.localScale = scale;
+    }
+
+    private void SetTrailEmitting(bool emitting)
+    {
+        if (tr != null)
+        {
+            tr.emitting = emitting;
+        }
+    }
 }

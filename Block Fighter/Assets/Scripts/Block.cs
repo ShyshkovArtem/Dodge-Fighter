@@ -1,21 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Block : MonoBehaviour
 {
- 
+    private const float DestroyBelowY = -6f;
 
-
-    void Update()
+    private void Update()
     {
-        if(transform.position.y < -6f)
+        if (transform.position.y < DestroyBelowY)
         {
             Destroy(gameObject);
         }
-
     }
-
-    
 }

@@ -1,79 +1,96 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;   
+using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
+    private const string MainMenuSceneName = "MainMenu";
+    private const string FirstRoomSceneName = "room1";
 
-    public GameObject shopPopUp;
-    public GameObject optionsPopUp;
-    public GameObject Logo;
-    public GameObject Buttons;
-    public GameObject PauseGameSet;
-    public AudioManager am;
+    [SerializeField] private GameObject shopPopUp;
+    [SerializeField] private GameObject optionsPopUp;
+    [SerializeField] private GameObject Logo;
+    [SerializeField] private GameObject Buttons;
+    [SerializeField] private GameObject PauseGameSet;
 
+    private AudioManager audioManager;
 
     private void Awake()
     {
-        am = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
+        GameObject audioObject = GameObject.FindGameObjectWithTag("Audio");
+        if (audioObject != null)
+        {
+            audioManager = audioObject.GetComponent<AudioManager>();
+        }
     }
 
-    //MAIN MENU UI
     public void OnStartButtonPressed()
     {
-        
-        SceneManager.LoadScene("room1");
-        am.PlaySFX(am.buttonClick);
+        audioManager?.PlayButtonClick();
+        SceneManager.LoadScene(FirstRoomSceneName);
     }
+
     public void OnOptionsButtonPressed()
     {
-        // Show the options pop-up menu for future
-        optionsPopUp.SetActive(true);
-        Logo.SetActive(false);
-        Buttons.SetActive(false);
-        am.PlaySFX(am.buttonClick);
+        SetMainMenuVisible(false);
+        SetActive(optionsPopUp, true);
+        audioManager?.PlayButtonClick();
+    }
+
+    public void OnShopButtonPressed()
+    {
+        SetMainMenuVisible(false);
+        SetActive(shopPopUp, true);
+        audioManager?.PlayButtonClick();
     }
 
     public void ClosePopup()
     {
-        optionsPopUp.SetActive(false);
-        Logo.SetActive(true);
-        Buttons.SetActive(true);
-        am.PlaySFX(am.buttonClick);
+        SetActive(optionsPopUp, false);
+        SetMainMenuVisible(true);
+        audioManager?.PlayButtonClick();
     }
 
-    /* Method for the Shop Button
-    public void OnShopButtonPressed()
+    public void CloseShopPopup()
     {
-        // Show the shop pop-up menu for future
-        shopPopUp.SetActive(true);
+        SetActive(shopPopUp, false);
+        SetMainMenuVisible(true);
+        audioManager?.PlayButtonClick();
     }
-
-    // Method for the Options Button
-    
-
-    
-    */
-
-
-    //IN GAME UI
 
     public void PauseGame()
     {
-        PauseGameSet.SetActive(true);
-        Time.timeScale = 0;
-        am.PlaySFX(am.buttonClick);
+        SetActive(PauseGameSet, true);
+        Time.timeScale = 0f;
+        audioManager?.PlayButtonClick();
     }
 
-    public void CountinueGame() 
-    { 
-        PauseGameSet.SetActive(false);
-        Time.timeScale = 1;
-        am.PlaySFX(am.buttonClick);
+    public void ContinueGame()
+    {
+        SetActive(PauseGameSet, false);
+        Time.timeScale = 1f;
+        audioManager?.PlayButtonClick();
     }
+
+    public void CountinueGame() => ContinueGame();
+
     public void HomeGame()
     {
-        SceneManager.LoadScene("MainMenu");
-        Time.timeScale = 1;
-        am.PlaySFX(am.buttonClick);
+        Time.timeScale = 1f;
+        audioManager?.PlayButtonClick();
+        SceneManager.LoadScene(MainMenuSceneName);
+    }
+
+    private void SetMainMenuVisible(bool isVisible)
+    {
+        SetActive(Logo, isVisible);
+        SetActive(Buttons, isVisible);
+    }
+
+    private static void SetActive(GameObject target, bool isActive)
+    {
+        if (target != null)
+        {
+            target.SetActive(isActive);
+        }
     }
 }
