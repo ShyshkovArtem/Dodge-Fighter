@@ -118,8 +118,9 @@ public class Player : MonoBehaviour
 
         Vector3 playerScreenPosition = mainCamera.WorldToScreenPoint(transform.position);
         bool shouldMoveLeft = Input.mousePosition.x < playerScreenPosition.x;
+        float horizontalVelocity = shouldMoveLeft ? -moveSpeed : moveSpeed;
 
-        rb.AddForce((shouldMoveLeft ? Vector2.left : Vector2.right) * moveSpeed);
+        rb.velocity = new Vector2(horizontalVelocity, rb.velocity.y);
         SetRunning(true);
         SetFacing(shouldMoveLeft ? FacingLeftX : FacingRightX);
     }
